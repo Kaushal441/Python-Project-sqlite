@@ -1,0 +1,133 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Emp {
+public:
+    int id;
+    string name;
+    int deptId;
+    double basicSalary;
+
+    Emp(int id, string name, int deptId, double basicSalary) {
+        this->id = id;
+        this->name = name;
+        this->deptId = deptId;
+        this->basicSalary = basicSalary;
+    }
+
+    virtual double computeNetSalary() {
+        return 0; // Base implementation returns 0
+    }
+};
+
+class Mgr : public Emp {
+public:
+    double perfBonus;
+
+    Mgr(int id, string name, int deptId, double basicSalary, double perfBonus)
+        : Emp(id, name, deptId, basicSalary) {
+        this->perfBonus = perfBonus;
+    }
+
+    double computeNetSalary() override {
+        return Emp::computeNetSalary() + perfBonus;
+    }
+};
+
+class Worker : public Emp {
+public:
+    int hoursWorked;
+    double hourlyRate;
+
+    Worker(int id, string name, int deptId, double basicSalary, int hoursWorked, double hourlyRate)
+        : Emp(id, name, deptId, basicSalary) {
+        this->hoursWorked = hoursWorked;
+        this->hourlyRate = hourlyRate;
+    }
+
+    double computeNetSalary() override {
+        return Emp::computeNetSalary() + (hoursWorked * hourlyRate);
+    }
+
+    double getHourlyRate() {
+        return hourlyRate;
+    }
+};
+
+int main() {
+    const int MAX_EMPLOYEES = 20;
+    Emp* employees[MAX_EMPLOYEES];
+    int numEmployees = 0;
+
+    while (true) {
+        cout << "Choose an option:\n"
+             << "1. Hire Manager\n"
+             << "2. Hire Worker\n"
+             << "3. Display Employee Information\n"
+             << "4. Exit\n";
+
+        int choice;
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                if (numEmployees < MAX_EMPLOYEES) {
+                    int id, deptId;
+                    string name;
+                    double basicSalary, perfBonus;
+
+                    cout << "Enter Manager details:\n";
+                    cin >> id >> name >> deptId >> basicSalary >> perfBonus;
+
+                    employees[numEmployees++] = new Mgr(id, name, deptId, basicSalary, perfBonus);
+                    cout << "Manager hired successfully.\n";
+                } else {
+                    cout << "Employee array is full.\n";
+                }
+                break;
+            case 2:
+                if (numEmployees < MAX_EMPLOYEES) {
+                    int id, deptId;
+                    string name;
+                    double basicSalary, hoursWorked, hourlyRate;
+
+                    cout << "Enter Worker details:\n";
+                    cin >> id >> name >> deptId >> basicSalary >> hoursWorked >> hourlyRate;
+
+                    employees[numEmployees++] = new Worker(id, name, deptId, basicSalary, hoursWorked, hourlyRate);
+                    cout << "Worker hired successfully.\n";
+                } else {
+                    cout << "Employee array is full.\n";
+                }
+                break;
+            case 3:
+                if (numEmployees > 0) {
+                    cout << "Employee Information:\n";
+                    for (int i = 0; i < numEmployees; i++) {
+                        cout << "ID: " << employees[i]->id << endl;
+                        cout << "Name: " << employees[i]->name << endl;
+                        cout << "Department ID: " << employees[i]->deptId << endl;
+                        cout << "Basic Salary: " << employees[i]->basicSalary << endl;
+                        cout << "Net Salary: " << employees[i]->computeNetSalary() << endl;
+
+                        if (dynamic_cast<Worker*>(employees[i])) {
+                            Worker* worker = dynamic_cast<Worker*>(employees[i]);
+                            cout << "Hourly Rate: " << worker->getHourlyRate() << endl;
+                        }
+
+                        cout << endl;
+                    }
+                } else {
+                    cout << "No employees to display.\n";
+                }
+                break;
+            case 4:
+                cout << "Exiting...\n";
+                return 0;
+            default:
+                cout << "Invalid choice.\n";
+        }
+    }
+}
