@@ -1,0 +1,119 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Emp {
+private:
+    int id;
+    string name;
+    int deptId;
+protected:
+    double basicSalary;
+
+public:
+    Emp(int id, string name, int deptId, double basicSalary) {
+        this->id = id;
+        this->name = name;
+        this->deptId = deptId;
+        this->basicSalary = basicSalary;
+    }
+
+    virtual double computeNetSalary() {
+        return 0; // Base implementation returns 0
+    }
+};
+
+class Mgr : public Emp {
+private:
+    double perfBonus;
+
+public:
+    Mgr(int id, string name, int deptId, double basicSalary, double perfBonus)
+        : Emp(id, name, deptId, basicSalary) {
+        this->perfBonus = perfBonus;
+    }
+
+    double computeNetSalary() override {
+        return basicSalary + perfBonus;
+    }
+};
+
+class Worker : public Emp {
+public:
+    int hoursWorked;
+    double hourlyRate;
+
+    Worker(int id, string name, int deptId, double basicSalary, int hoursWorked, double hourlyRate)
+        : Emp(id, name, deptId, basicSalary) {
+        this->hoursWorked = hoursWorked;
+        this->hourlyRate = hourlyRate;
+    }
+
+    double computeNetSalary() override {
+        return basicSalary + (hoursWorked * hourlyRate);
+    }
+
+    double getHourlyRate() {
+        return hourlyRate;
+    }
+};
+
+int main() {
+    const int MAX_EMPLOYEES = 20;
+    Emp* employees[MAX_EMPLOYEES];
+    int numEmployees = 0;
+    int id, deptId, hoursWorked, choice;
+    string name;
+    double basicSalary, perfBonus, hourlyRate;
+
+    do {
+        cout << "Choose an option:\n"
+             << "1. Hire Manager\n"
+             << "2. Hire Worker\n"
+             << "3. Display Employee Information\n"
+             << "4. Exit\n";
+
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter Manager details:\n";
+                cin >> id >> name >> deptId >> basicSalary >> perfBonus;
+
+                employees[numEmployees++] = new Mgr(id, name, deptId, basicSalary, perfBonus);
+                cout << "Manager hired successfully.\n";
+                break;
+
+            case 2:
+                cout << "Enter Worker details:\n";
+                cin >> id >> name >> deptId >> basicSalary >> hoursWorked >> hourlyRate;
+
+                employees[numEmployees++] = new Worker(id, name, deptId, basicSalary, hoursWorked, hourlyRate);
+                cout << "Worker hired successfully.\n";
+                break;
+
+            case 3:
+                cout << "Employee Information:\n";
+                for (int i = 0; i < numEmployees; i++) {
+                    if (dynamic_cast<Worker*>(employees[i])) {
+                        Worker* worker = dynamic_cast<Worker*>(employees[i]);
+                        cout << "Hourly Rate: " << worker->getHourlyRate() << endl;
+                        cout << "Net Salary worker : " << worker->computeNetSalary() << endl;
+                    } else if (dynamic_cast<Mgr*>(employees[i])) {
+                        Mgr* manager = dynamic_cast<Mgr*>(employees[i]);
+                        cout << "Net Salary manager : " << manager->computeNetSalary() << endl;
+                    }
+                    cout << endl;
+                }
+                break;
+
+            case 4:
+                cout << "Exiting...\n";
+                return 0;
+
+            default:
+                cout << "Invalid choice.\n";
+        }
+    } while (choice != 4);
+}
